@@ -35,7 +35,6 @@ from generate_dmt import system_instruction
 from chat import Chat
 from gameModel import GameModel
 
-# Worker thread classes
 class GenerateThread(QThread):
     result_ready = pyqtSignal(GameModel)
 
@@ -60,7 +59,7 @@ class ImageThread(QThread):
     def run(self):
         runs = 0
         res = None
-        while runs < 3: # After 3 attempts, give up.
+        while runs < 3:
             try:
                 runs += 1
                 res = self.client.images.generate(
@@ -102,7 +101,6 @@ class GameWindow(QMainWindow):
         self.game_widget = QWidget()
         self.game_widget.setLayout(self.game_layout)
 
-        # Font for the game text
         self.font = QFont()
         self.font.setPointSize(12)
 
@@ -162,8 +160,6 @@ class GameWindow(QMainWindow):
         self.main_widget.setLayout(self.main_layout)
         self.setCentralWidget(self.main_widget)
 
-        # Progress bar for health
-
         self.health_bar = QProgressBar()
         self.health_bar.setMaximum(100)
         self.health_bar.setFormat("Health: %v/%m")
@@ -171,7 +167,6 @@ class GameWindow(QMainWindow):
         # self.health_bar.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
         self.health_bar.setFixedHeight(20)
 
-        # Labels for stats
         self.stats_layout = QHBoxLayout()
         self.stats_labels = {}
         for stat in ["Strength", "Agility", "Intelligence", "Charisma"]:
@@ -192,7 +187,6 @@ class GameWindow(QMainWindow):
 
         self.game_layout.addWidget(self.status_widget)
 
-        # Response box for the chapter text
         self.response_box = QTextEdit()
         self.response_box.setReadOnly(True)
         self.response_box.setAcceptRichText(True)
@@ -205,7 +199,6 @@ class GameWindow(QMainWindow):
         self.chapter_layout = QVBoxLayout()
         self.chapter_layout.addWidget(self.response_box)
 
-        # Image display
         self.image_label = AutoResizingLabel()
         self.image_label.setAlignment(Qt.AlignCenter)
         self.image_label.setFixedSize(400, 300)
@@ -214,13 +207,12 @@ class GameWindow(QMainWindow):
 
         self.image_layout = QHBoxLayout()
         self.image_layout.addItem(QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum))
-        self.image_layout.addWidget(self.image_label) # Center the image with two spacers on either side.
+        self.image_layout.addWidget(self.image_label)
         self.image_layout.addItem(QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum))
 
         self.chapter_layout.addLayout(self.image_layout)
         self.game_layout.addLayout(self.chapter_layout)
 
-        # Choice buttons
         self.choice_buttons = []
         self.buttons_layout = QHBoxLayout()
 
@@ -238,7 +230,6 @@ class GameWindow(QMainWindow):
 
         init_window(self)
 
-        # Initialize game
         self.init_game()
 
     def set_window_icon(self):
@@ -250,6 +241,8 @@ class GameWindow(QMainWindow):
         self.background.setGeometry(self.rect())
         self.background.setScaledContents(True)
         self.background.lower()
+
+    # ai code incoming
 
     def adjust_response_box_height(self):
         doc_height = self.response_box.document().size().height() - 50
@@ -263,15 +256,12 @@ class GameWindow(QMainWindow):
         self.response_box.setMaximumHeight(int(self.height() * 0.4))
         self.adjust_response_box_height()
     
-        # Calculate the scaling factor based on the new window size
         width_factor = self.width() / 1920
         height_factor = self.height() / 1080
         scale_factor = min(width_factor, height_factor)
     
-        # Calculate the new font size based on the scale factor
-        new_font_size = max(8, int(8 * scale_factor))  # Ensure a minimum font size of 8
+        new_font_size = max(8, int(8 * scale_factor))
     
-        # Set the new font size
         font = QFont()
         font.setPointSize(new_font_size)
         for button in self.choice_buttons:
@@ -288,6 +278,8 @@ class GameWindow(QMainWindow):
         self.display_image()
 
         self.background.setGeometry(self.rect())
+
+    # end of ai code
 
     def init_game(self):
         self.settings = loadSettings()
@@ -306,7 +298,6 @@ class GameWindow(QMainWindow):
                 ),
                 client = self.genaiClient,
             )
-            # Start the generate thread
             self.start_generate_thread("...")
 
     def start_generate_thread(self, message=None):
@@ -332,25 +323,21 @@ class GameWindow(QMainWindow):
         if self.autosave_toggle.isEnabled() and self.autosave_location:
             self.save_game(self.autosave_location)
 
-        # Update the chapter text with markdown
         chapter_text = game.chapterText.replace("\\n", "\n")
         self.response_box.setMarkdown(chapter_text)
         self.response_box.moveCursor(QTextCursor.Start)
         self.resizeEvent(None)
 
-        # Update the health bar
         self.health_bar.setMaximum(game.maxHealth)
         self.health_bar.setValue(game.health)
 
 
-        # Update the stats labels
         stats = game.stats
         for stat_name, value in vars(stats).items():
             key = stat_name.lower()
             if key in self.stats_labels:
                 self.stats_labels[key].setText(f"{stat_name.capitalize()}: {value}")
 
-        # Update the inventory display
         self.inventory_list.clear()
         inventory = game.inventory
         for item in inventory:
@@ -379,12 +366,10 @@ class GameWindow(QMainWindow):
             item_listwidget.setSizeHint(item_widget.sizeHint())
             self.inventory_list.setItemWidget(item_listwidget, item_widget)
 
-        # Update the Quest Display
         self.quest_title.setText(game.currentQuest.title)
         self.quest_description.setMarkdown(game.currentQuest.description)
         self.quest_progress.setValue(game.currentQuest.completed_percentage)
 
-        # Update the choice buttons
         choices = game.choices
         for idx, button in enumerate(self.choice_buttons):
             try:
@@ -423,7 +408,7 @@ class GameWindow(QMainWindow):
         if not hasattr(self, "image"):
             self.image = pil_image
         
-        self.image_label.setText("")  # Clear the text
+        self.image_label.setText("")
 
 
 
@@ -436,7 +421,6 @@ class GameWindow(QMainWindow):
         self.image_label.setToolTip(self.image_prompt)
 
     def use_item(self, item_name, option):
-        # Add the choice to the message history
         choice = f"Use item '{item_name}' - Option '{option}'"
         message = types.Part(
             text = choice
@@ -451,19 +435,15 @@ class GameWindow(QMainWindow):
         sender = self.sender()
         choice_text = sender.text()
 
-        # Add the choice to the message history
         message = types.Part(
             text = f"I have chosen: {choice_text}",
         )
 
-        # Display loading message
         self.response_box.setMarkdown("# Loading...")
 
-        # Disable buttons while loading
         for button in self.choice_buttons:
             button.setEnabled(False)
 
-        # Start the generate thread
         self.start_generate_thread(message)
 
     def save_game(self, saveLocation=None):
@@ -472,7 +452,7 @@ class GameWindow(QMainWindow):
             file_name, _ = QFileDialog.getSaveFileName(self, "Save Game", "", "Dungeon Master Session Files (*.dms)", options=options)
             if file_name:
                 clean_chat = self.chat
-                clean_chat.client = None # Remove the client to avoid storing sensitive information in the client.
+                clean_chat.client = None
                 with open(file_name, "wb") as file:
                     pickle.dump(clean_chat, file)
             self.autosave_location = file_name
@@ -492,13 +472,12 @@ class GameWindow(QMainWindow):
 
             self.chat.client = self.genaiClient
 
-            if isinstance(self.chat.history[-1], types.Content): # Last message was user-sent
+            if isinstance(self.chat.history[-1], types.Content):
                 self.start_generate_thread()
             else:
-                self.update_game(self.chat.history[-1].parsed) # Update the game based on the model response.
+                self.update_game(self.chat.history[-1].parsed)
 
     def closeEvent(self, event):
-        # Ensure threads are properly terminated
         if hasattr(self, 'generate_thread') and self.generate_thread.isRunning():
             self.generate_thread.quit()
             self.generate_thread.wait()

@@ -23,6 +23,8 @@ from settings import loadSettings
 from pydantic import BaseModel
 
 
+# Credit to https://www.awesomegptprompts.com/gptpromp/epic-adventure-role-playing-game
+# Modified a bit.
 system_instruction = '''
 Welcome to our epic adventure role playing game! You are playing the role of the [DM], or Dungeon Master, and I am the player of this game. In this game, we will be venturing into a magical world filled with danger and mystery.
 
@@ -297,7 +299,7 @@ class DMTEditor(QMainWindow):
 
         self.thread = AIThread(
             client = genai.Client(api_key=settings.gemini_api_key),
-            model = settings.gemini_model or "gemini-2.5-flash",
+            model = settings.gemini_model or "gemini-flash-latest",
             contents = user_prompt,
             config = types.GenerateContentConfig(
                 temperature = 2.0,

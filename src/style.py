@@ -6,7 +6,6 @@ from PyQt5.QtGui import QPixmap, QIcon, QFont
 from PyQt5.QtCore import Qt
 
 text = QFont("Helvetica")
-menu_options = QFont("Lucida Console")
 
 stylesheet = """
             * {
@@ -28,7 +27,7 @@ stylesheet = """
             }
 
             Button {
-                font-family: "Lucida Console";
+                font-family: "Lucida Console", monospace, sans-serif;
                 background-color: rgba(0,0,0,0.2);
                 color: white;
                 border: rgba(0,0,0,0);
@@ -117,16 +116,26 @@ QLabel {
 """
 
 def init_window(win: QMainWindow, autosize: bool = True):
-    if autosize and not debug_for_gamma:
+    if autosize:
         geom = QApplication.primaryScreen().availableGeometry()
         width, height = geom.width(), geom.height()
         res = (1024, 640)
-        if width >= 1920 and height >= 1080:
-            res = (1920, 1080)
-        elif width >= 1366 and height >= 768:
-            res = (1366, 768)
+        scale = 0.8
+        scaled_w, scaled_h = int(scale*width), int(scale*height)
+
+        # if width >= 1920 and height >= 1080:
+        #     res = (1920, 1080)
+        # elif width >= 1366 and height >= 768:
+        #     res = (1366, 768)
+
+        w = max(scaled_w, res[0])
+        h = max(scaled_h, res[1])
+
+
+        x = geom.x() + (width - w) // 2
+        y = geom.y() + (height - h) // 2
         
-        win.setGeometry(0, 0, res[0], res[1])
+        win.setGeometry(x, y, w, h)
     
 
     icon_path = "assets/icon.png"

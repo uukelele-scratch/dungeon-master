@@ -10,7 +10,7 @@ settings = loadSettings()
 class Chat:
     def __init__(self, config: types.GenerateContentConfig, client: Client=None):
         self.history: list[Union[types.GenerateContentResponse, types.Content]] = []
-        self.model = settings.gemini_model or "gemini-2.5-flash"
+        self.model = settings.gemini_model or "gemini-flash-latest"
         self.config = config
         self.client = client
 

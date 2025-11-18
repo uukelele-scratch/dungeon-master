@@ -14,13 +14,15 @@ from PyQt5.QtWidgets import (
     QLineEdit,
     QComboBox,
 )
-from style import init_window, menu_options
+from style import init_window
 import pickle, os
 
 gemini_models = [
+    "gemini-flash-latest",
+    "gemini-flash-lite-latest",
     "gemini-2.5-pro",
     "gemini-2.5-flash",
-    "gemini-2.5-flash-lite-preview-06-17",
+    "gemini-2.5-flash-lite",
     "gemini-2.0-flash",
     "gemini-2.0-flash-lite",
     "gemini-1.5-flash",
@@ -32,7 +34,7 @@ class SettingsObject:
     def __init__(self, gemini_api_key: str="", together_api_key: str="", gemini_model: str=""):
         self.gemini_api_key: str = gemini_api_key
         self.together_api_key: str = together_api_key
-        self.gemini_model: str = gemini_model or "gemini-2.5-flash"
+        self.gemini_model: str = gemini_model or "gemini-flash-latest"
 
 def loadSettings() -> SettingsObject | None:
     settings_path = os.path.join(os.path.dirname(__file__), "settings.dmx")

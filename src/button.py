@@ -8,7 +8,8 @@ class Button(QPushButton):
         self.full_text = "> " + text.lower()
         super().__init__("", *args, **kwargs)
         self.setFixedWidth(350)
-        self.setFont(QFont("Lucida Console"))
+        # self.setFont(QFont("Lucida Console"))
+        # ^ managed by the stylesheet in `style.py`
         self.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
         self.animation = QPropertyAnimation(self, b"geometry")
         self.original_position = self.geometry()

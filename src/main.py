@@ -86,9 +86,6 @@ class MainWindow(QMainWindow):
         self.main_widget.setLayout(self.layout)
         self.setCentralWidget(self.main_widget)
 
-        self.bg_thread = BgThread(self)
-        self.bg_thread.start()
-
 
     def play(self):
         if not loadSettings():
@@ -143,25 +140,6 @@ class MainWindow(QMainWindow):
     def resizeEvent(self, event):
         self.background.setGeometry(self.rect())
         super().resizeEvent(event)
-
-class BgThread(QThread):
-    def __init__(self, window: QMainWindow):
-        super().__init__()
-        self.window = window
-
-    def run(self):
-        text = style_text("> New Game_", color="white", bold=False)
-        label = QLabel(text)
-        label.setAlignment(Qt.AlignCenter)
-        label.setObjectName("statusLabel")
-        label.setMinimumWidth(200)
-        label.setMaximumWidth(600)
-        label.setFixedHeight(30)
-        font = label.font()
-        font.setPointSize(12)
-        font.setBold(True)
-        label.setFont(font)
-
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

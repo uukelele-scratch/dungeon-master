@@ -15,7 +15,7 @@ class About(QMainWindow):
         self.setGeometry(500, 500, 600, 400)
         self.setFixedSize(600, 400)
         init_window(self)
-        url = "https://https.pythonanywhere.com/about"
+        url = "https://uukelele.is-a.dev/dungeon_master"
         self.browser = QWebEngineView()
         self.browser.setUrl(QUrl(url))
         self.layout = QVBoxLayout()
