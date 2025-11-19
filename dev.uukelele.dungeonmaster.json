@@ -1,7 +1,7 @@
 {
     "app-id": "dev.uukelele.dungeonmaster",
     "runtime": "org.kde.Platform",
-    "runtime-version": "5.15-23.08",
+    "runtime-version": "5.15-24.08",
     "sdk": "org.kde.Sdk",
     "command": "dungeon-master",
     "finish-args": [
@@ -9,12 +9,17 @@
         "--socket=fallback-x11",
         "--socket=wayland",
         "--device=dri",
-        "--share=network" 
+        "--share=network"
     ],
     "modules": [
         {
             "name": "dungeon-master",
             "buildsystem": "simple",
+            "build-options": {
+                "build-args": [
+                    "--share=network"
+                ]
+            },
             "build-commands": [
                 "pip3 install --prefix=/app -r requirements.txt", 
                 "install -D src/main.py /app/bin/dungeon-master",
