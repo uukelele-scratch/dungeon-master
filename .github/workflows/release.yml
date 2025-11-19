@@ -44,13 +44,21 @@ jobs:
         with:
           path: installer_script.iss
 
+      - name: Prepare Artifacts
+        shell: bash
+        run: |
+          VERSION="${GITHUB_REF_NAME}"
+          mkdir release_upload
+          
+          mv dist/DungeonMaster.exe release_upload/DungeonMaster-${VERSION}-windows-x64.exe
+          
+          mv Output/DungeonMaster_Installer_*.exe release_upload/
+
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: windows-builds
-          path: |
-            dist/DungeonMaster.exe
-            Output/DungeonMaster_Installer_*.exe
+          path: release_upload/*
 
   # Linux (AppImage + Flatpak)
   build-linux:
@@ -74,12 +82,15 @@ jobs:
       - name: Build PyInstaller Binary
         run: pyinstaller --noconfirm --onefile --windowed --name "DungeonMaster" --add-data "assets:assets" src/main.py
 
+      - name: Build AppImage Folder
+        run: pyinstaller --noconfirm --onedir --windowed --name "DungeonMaster_Dir" --add-data "assets:assets" src/main.py
+
       - name: Package as AppImage
         run: |
           mkdir -p AppDir/usr/bin
           mkdir -p AppDir/usr/share/icons/hicolor/256x256/apps/
           
-          cp dist/DungeonMaster AppDir/usr/bin/
+          cp dist/DungeonMaster_Dir/* AppDir/usr/bin/
           
           cp assets/icon.png AppDir/dungeonmaster.png
           cp assets/icon.png AppDir/usr/share/icons/hicolor/256x256/apps/dungeonmaster.png
@@ -88,12 +99,12 @@ jobs:
           [Desktop Entry]
           Type=Application
           Name=Dungeon Master
-          Exec=DungeonMaster
+          Exec=DungeonMaster_Dir
           Icon=dungeonmaster
           Categories=Game;
           EOF
           
-          ln -s usr/bin/DungeonMaster AppDir/AppRun
+          ln -s usr/bin/DungeonMaster_Dir AppDir/AppRun
           
           wget -O appimagetool "https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage"
           chmod +x appimagetool
@@ -108,13 +119,23 @@ jobs:
 
           flatpak build-bundle repo DungeonMaster.flatpak dev.uukelele.dungeonmaster
 
+      - name: Prepare Artifacts
+        run: |
+          VERSION="${GITHUB_REF_NAME}"
+          mkdir release_upload
+          
+          mv dist/DungeonMaster release_upload/DungeonMaster-${VERSION}-linux-x86_64
+          
+          mv DungeonMaster.AppImage release_upload/DungeonMaster-${VERSION}-linux-x86_64.AppImage
+          
+          mv DungeonMaster.flatpak release_upload/dev.uukelele.dungeonmaster-${VERSION}.flatpak
+
+
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: linux-builds
-          path: |
-            DungeonMaster.AppImage
-            DungeonMaster.flatpak
+          path: release_upload/*
 
   # macOS
   build-macos:
@@ -135,11 +156,6 @@ jobs:
       - name: Build .app
         run: pyinstaller --noconfirm --windowed --name "DungeonMaster" --icon "assets/icon.png" --add-data "assets:assets" src/main.py
 
-      - name: Zip the .app
-        run: |
-          cd dist
-          zip -r DungeonMaster.app.zip DungeonMaster.app
-
       - name: Create DMG
         run: |
           mkdir -p dist_dmg
@@ -154,13 +170,18 @@ jobs:
             "dist_dmg/DungeonMaster.dmg" \
             "dist/DungeonMaster.app"
 
+      - name: Prepare Artifacts
+        run: |
+          VERSION="${GITHUB_REF_NAME}"
+          mkdir release_upload
+          
+          mv dist_dmg/DungeonMaster.dmg release_upload/DungeonMaster-${VERSION}-macos-universal.dmg
+
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: macos-builds
-          path: |
-            dist_dmg/DungeonMaster.dmg
-            dist/DungeonMaster.app.zip
+          path: release_upload/*
 
   publish:
     needs: [build-windows, build-linux, build-macos]
@@ -174,6 +195,6 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: |
-            windows-builds/**/*
-            linux-builds/**/*
-            macos-builds/**/*
+            windows-builds/*
+            linux-builds/*
+            macos-builds/*
