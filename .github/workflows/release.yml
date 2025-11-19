@@ -36,7 +36,8 @@ jobs:
         run: |
           VERSION="${GITHUB_REF_NAME#v}"
           echo "Injecting version: $VERSION"
-          sed -i "s/#define AppVersion \".*\"/#define AppVersion \"$VERSION\"/" installer_script.iss
+          sed -i -E "s/#define AppVersion[[:space:]]+\".*\"/#define AppVersion \"$VERSION\"/" installer_script.iss
+          grep "AppVersion" installer_script.iss
 
       - name: Compiling Installer via Inno Setup
         uses: Minionguyjpro/Inno-Setup-Action@v1.2.2
