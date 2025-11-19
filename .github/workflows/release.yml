@@ -100,9 +100,9 @@ jobs:
           flatpak remote-add --if-not-exists --user flathub https://flathub.org/repo/flathub.flatpakrepo
           flatpak install --user -y flathub org.kde.Sdk//5.15-24.08 org.kde.Platform//5.15-24.08
           
-          flatpak-builder --user --force-clean build-dir dev.uukelele.dungeonmaster.json
+          flatpak-builder --user --force-clean --repo=repo build-dir dev.uukelele.dungeonmaster.json
 
-          flatpak build-bundle ~/.local/share/flatpak/repo DungeonMaster.flatpak dev.uukelele.dungeonmaster
+          flatpak build-bundle repo DungeonMaster.flatpak dev.uukelele.dungeonmaster
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
