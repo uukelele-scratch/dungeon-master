@@ -12,11 +12,10 @@ from PyQt5.QtWidgets import (
     QSizePolicy,
     QMessageBox,
 )
-from PyQt5.QtGui import QPixmap
-from PyQt5.QtCore import Qt, QPropertyAnimation, QRect, QThread
+from PyQt5.QtGui import QPixmap, QDesktopServices
+from PyQt5.QtCore import Qt, QPropertyAnimation, QRect, QThread, QUrl
 from game import GameWindow
 from generate_dmt import DMTEditor
-from about import About
 from settings import Settings, loadSettings
 from style import *
 from button import Button
@@ -130,8 +129,8 @@ class MainWindow(QMainWindow):
         self.hide()
 
     def about(self):
-        self.about_window = About()
-        self.about_window.show()
+        url = QUrl("https://uukelele.is-a.dev/dungeon-master")
+        QDesktopServices.openUrl(url)
 
     def settings(self):
         self.settings_window = Settings()

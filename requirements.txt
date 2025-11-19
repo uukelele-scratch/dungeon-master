@@ -1,5 +1,4 @@
 PyQt5
-PyQtWebEngine
 pillow
 google-genai
 together
