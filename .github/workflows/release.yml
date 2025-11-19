@@ -27,6 +27,14 @@ jobs:
       - name: Build Folder for Installer
         run: pyinstaller --noconfirm --onedir --windowed --name "DungeonMaster" --icon "assets/icon.ico" --add-data "assets;assets" src/main.py
 
+      - name: Set Installer Version
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: bash # with git bash
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          echo "Injecting version: $VERSION"
+          sed -i "s/#define AppVersion \".*\"/#define AppVersion \"$VERSION\"/" installer_script.iss
+
       - name: Compiling Installer via Inno Setup
         uses: Minionguyjpro/Inno-Setup-Action@v1.2.2
         with:

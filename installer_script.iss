@@ -1,5 +1,5 @@
 #define AppName      "Dungeon Master"
-#define AppVersion   "1.0.0"
+#define AppVersion   "DEV-BUILD"
 #define AppPublisher "Uukelele"
 #define AppExeName   "DungeonMaster.exe"
 #define AppIcon      "assets\icon.ico"
