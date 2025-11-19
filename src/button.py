@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QPushButton, QSizePolicy
 from PyQt5.QtCore import QPropertyAnimation, QRect, QTimer
-from PyQt5.QtGui import QFont
+from PyQt5.QtGui import QFont, QFontDatabase
 import random
 
 class Button(QPushButton):
@@ -8,8 +8,7 @@ class Button(QPushButton):
         self.full_text = "> " + text.lower()
         super().__init__("", *args, **kwargs)
         self.setFixedWidth(350)
-        # self.setFont(QFont("Lucida Console"))
-        # ^ managed by the stylesheet in `style.py`
+        self.setFont(QFontDatabase.systemFont(QFontDatabase.FixedFont))
         self.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
         self.animation = QPropertyAnimation(self, b"geometry")
         self.original_position = self.geometry()

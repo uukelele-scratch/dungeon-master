@@ -2,110 +2,106 @@
 
 import sys
 from PyQt5.QtWidgets import QLabel, QMainWindow, QApplication, QSizePolicy
-from PyQt5.QtGui import QPixmap, QIcon, QFont
+from PyQt5.QtGui import QPixmap, QIcon, QFont, QFontDatabase
 from PyQt5.QtCore import Qt
+import os
 
 text = QFont("Helvetica")
 
-stylesheet = """
-            * {
-                font-family: "Helvetica";
-            }
+def load_fonts(fonts: list[str] = ["figtree.ttf", "FiraCodeNerdFontMono.ttf"]) -> dict[str, str]:
+    return { font: QFontDatabase.applicationFontFamilies(uid)[0] for font in fonts if (uid := QFontDatabase.addApplicationFont(os.path.abspath(os.path.join(os.path.dirname(os.path.dirname(__file__)), "assets", font)))) != -1 }
 
-            QPushButton {
-                background-color: rgba(0,0,0,0.2);
-                color: white;
-                border: rgba(0,0,0,0);
-                border-radius: 10px;
-                padding: 10px;
-                font-size: 16px;
-                text-align: left;
-            }
 
-            QPushButton:hover {
-                background-color:rgba(0,0,0,0.3);
-            }
+def get_stylesheet(fonts = None):
+    fonts = fonts or load_fonts()
+    return """
+                * {
+                    font-family: "Helvetica";
+                }
 
-            Button {
-                font-family: "Lucida Console", monospace, sans-serif;
-                background-color: rgba(0,0,0,0.2);
-                color: white;
-                border: rgba(0,0,0,0);
-                border-radius: 10px;
-                padding: 10px;
-                font-size: 32px;
-                text-align: left;
-            }
+                QPushButton {
+                    background-color: rgba(0,0,0,0.2);
+                    color: white;
+                    border: rgba(0,0,0,0);
+                    border-radius: 10px;
+                    padding: 10px;
+                    font-size: 16px;
+                    text-align: left;
+                }
 
-            Button:hover {
-                background-color:rgba(0,0,0,0.3);
-                padding-left: 10px;
-            }
+                QPushButton:hover {
+                    background-color:rgba(0,0,0,0.3);
+                }
 
-            QLabel {
-                background: rgba(0,0,0,0.2);
-                color: white;
-                border: rgba(0,0,0,0);
-                border-radius: 10px;
-                padding:10px;
-                text-align:center;
-            }
+                Button {
+                    /* font-family: "Lucida Console", "Consolas", "Courier New", "Menlo", monospace, sans-serif; */
+                    font-family: """ + f'"{fonts["FiraCodeNerdFontMono.ttf"]}";tree' + """
+                }
 
-            QTextEdit {
-                background:rgba(0,0,0,0.5);
-                color:white;
-                border: rgba(0,0,0,0);
-                border-radius:10px;
-                padding:10px;
-            }
+                QLabel {
+                    background: rgba(0,0,0,0.2);
+                    color: white;
+                    border: rgba(0,0,0,0);
+                    border-radius: 10px;
+                    padding:10px;
+                    text-align:center;
+                }
 
-            QListWidget {
-                background:rgba(0,0,0,0.4);
-                color:white;
-                border: rgba(0,0,0,0);
-                border-radius:10px;
-                padding:10px;
-            }
+                QTextEdit {
+                    background:rgba(0,0,0,0.5);
+                    color:white;
+                    border: rgba(0,0,0,0);
+                    border-radius:10px;
+                    padding:10px;
+                }
 
-            QListWidget::item {
-                background:rgba(0,0,0,0.3);
-                color:white;
-                border: rgba(0,0,0,0);
-                border-radius:10px;
-                padding:0px;
-            }
+                QListWidget {
+                    background:rgba(0,0,0,0.4);
+                    color:white;
+                    border: rgba(0,0,0,0);
+                    border-radius:10px;
+                    padding:10px;
+                }
 
-            QLabel[labelType="inventory"] {
-                padding:0px;
-                background: rgba(0,0,0,0);
-            }
+                QListWidget::item {
+                    background:rgba(0,0,0,0.3);
+                    color:white;
+                    border: rgba(0,0,0,0);
+                    border-radius:10px;
+                    padding:0px;
+                }
 
-            QPushButton[buttonType="inventory"] {
-                padding:0px;
-            }
+                QLabel[labelType="inventory"] {
+                    padding:0px;
+                    background: rgba(0,0,0,0);
+                }
 
-            QSplitter::handle {
-                background: rgba(0,0,0,0);
-            }
+                QPushButton[buttonType="inventory"] {
+                    padding:0px;
+                }
 
-            QProgressBar {
-                text-align: center;
-                background-color: rgba(0,0,0,0.5);
-                border: 3px solid white;
-                border-radius: 10px;
-                color: white;
-            }
+                QSplitter::handle {
+                    background: rgba(0,0,0,0);
+                }
 
-            QProgressBar::chunk {
-                background-color: #4287f511;
-                border-radius: 10px;
-                text-align: center;
-            }
+                QProgressBar {
+                    text-align: center;
+                    background-color: rgba(0,0,0,0.5);
+                    border: 3px solid white;
+                    border-radius: 10px;
+                    color: white;
+                }
 
-            QCheckBox {
-                color:white;
-            }
-"""
+                QProgressBar::chunk {
+                    background-color: #4287f511;
+                    border-radius: 10px;
+                    text-align: center;
+                }
+
+                QCheckBox {
+                    color:white;
+                }
+    """
 
 
 image_friendly = """
@@ -155,7 +151,7 @@ def init_window(win: QMainWindow, autosize: bool = True):
     if hasattr(win, "icon_label"):
         win.icon_label.setStyleSheet(image_friendly)
     win.background.setStyleSheet(image_friendly)
-    win.setStyleSheet(stylesheet)
+    win.setStyleSheet(get_stylesheet())
 
 class AutoResizingLabel(QLabel):
     def __init__(self, pixmap=None):
