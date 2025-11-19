@@ -89,7 +89,7 @@ jobs:
           mkdir -p AppDir/usr/bin
           mkdir -p AppDir/usr/share/icons/hicolor/256x256/apps/
           
-          cp dist/DungeonMaster_Dir/* AppDir/usr/bin/
+          cp dist/DungeonMaster_Dir/* AppDir/usr/bin/ -r
           
           cp assets/icon.png AppDir/dungeonmaster.png
           cp assets/icon.png AppDir/usr/share/icons/hicolor/256x256/apps/dungeonmaster.png
