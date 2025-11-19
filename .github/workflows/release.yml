@@ -1,0 +1,166 @@
+name: Build and Release
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  # Windows
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          
+      - name: Install Dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install pyinstaller
+
+      - name: Build Portable EXE
+        run: pyinstaller --noconfirm --onefile --windowed --name "DungeonMaster" --icon "assets/icon.ico" --add-data "assets;assets" src/main.py
+
+      - name: Build Folder for Installer
+        run: pyinstaller --noconfirm --onedir --windowed --name "DungeonMaster" --icon "assets/icon.ico" --add-data "assets;assets" src/main.py
+
+      - name: Compiling Installer via Inno Setup
+        uses: Minionguyjpro/Inno-Setup-Action@v1.2.2
+        with:
+          path: installer_script.iss
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-builds
+          path: |
+            dist/DungeonMaster.exe
+            Output/DungeonMaster_Installer_*.exe
+
+  # Linux (AppImage + Flatpak)
+  build-linux:
+    runs-on: ubuntu-20.04 # Use older Ubuntu for compatibility
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install System Deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y flatpak flatpak-builder fuse libfuse2
+
+      - name: Install Python Deps
+        run: pip install -r requirements.txt pyinstaller
+
+      - name: Build PyInstaller Binary
+        run: pyinstaller --noconfirm --onefile --windowed --name "DungeonMaster" --add-data "assets:assets" src/main.py
+
+      - name: Package as AppImage
+        run: |
+          mkdir -p AppDir/usr/bin
+          mkdir -p AppDir/usr/share/icons/hicolor/256x256/apps/
+          
+          cp dist/DungeonMaster AppDir/usr/bin/
+          
+          cp assets/icon.png AppDir/dungeonmaster.png
+          cp assets/icon.png AppDir/usr/share/icons/hicolor/256x256/apps/dungeonmaster.png
+          
+          cat > AppDir/dungeonmaster.desktop <<EOF
+          [Desktop Entry]
+          Type=Application
+          Name=Dungeon Master
+          Exec=DungeonMaster
+          Icon=dungeonmaster
+          Categories=Game;
+          EOF
+          
+          ln -s usr/bin/DungeonMaster AppDir/AppRun
+          
+          wget -O appimagetool "https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage"
+          chmod +x appimagetool
+          ./appimagetool AppDir DungeonMaster.AppImage
+
+      - name: Build Flatpak
+        run: |
+          flatpak remote-add --if-not-exists --user flathub https://flathub.org/repo/flathub.flatpakrepo
+          flatpak install --user -y flathub org.kde.Sdk//5.15-23.08 org.kde.Platform//5.15-23.08
+          
+          flatpak-builder --user --share=network --force-clean build-dir dev.uukelele.dungeonmaster.json
+          flatpak build-bundle ~/.local/share/flatpak/repo DungeonMaster.flatpak dev.uukelele.dungeonmaster
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-builds
+          path: |
+            DungeonMaster.AppImage
+            DungeonMaster.flatpak
+
+  # macOS
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          
+      - name: Install Deps
+        run: |
+          pip install -r requirements.txt pyinstaller
+          brew install create-dmg
+
+      - name: Build .app
+        run: pyinstaller --noconfirm --windowed --name "DungeonMaster" --icon "assets/icon.png" --add-data "assets:assets" src/main.py
+
+      - name: Zip the .app
+        run: |
+          cd dist
+          zip -r DungeonMaster.app.zip DungeonMaster.app
+
+      - name: Create DMG
+        run: |
+          mkdir -p dist_dmg
+          create-dmg \
+            --volname "Dungeon Master" \
+            --window-pos 200 120 \
+            --window-size 800 400 \
+            --icon-size 100 \
+            --icon "DungeonMaster.app" 200 190 \
+            --hide-extension "DungeonMaster.app" \
+            --app-drop-link 600 185 \
+            "dist_dmg/DungeonMaster.dmg" \
+            "dist/DungeonMaster.app"
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-builds
+          path: |
+            dist_dmg/DungeonMaster.dmg
+            dist/DungeonMaster.app.zip
+
+  publish:
+    needs: [build-windows, build-linux, build-macos]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download All Artifacts
+        uses: actions/download-artifact@v4
+        
+      - name: Publish to Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: |
+            windows-builds/*
+            linux-builds/*
+            macos-builds/*
