@@ -62,7 +62,7 @@ jobs:
       - name: Install System Deps
         run: |
           sudo apt-get update
-          sudo apt-get install -y flatpak flatpak-builder fuse libfuse2
+          sudo apt-get install -y flatpak flatpak-builder fuse3 libfuse2
 
       - name: Install Python Deps
         run: pip install -r requirements.txt pyinstaller
@@ -101,7 +101,7 @@ jobs:
           flatpak install --user -y flathub org.kde.Sdk//5.15-24.08 org.kde.Platform//5.15-24.08
           
           flatpak-builder --user --force-clean build-dir dev.uukelele.dungeonmaster.json
-          
+
           flatpak build-bundle ~/.local/share/flatpak/repo DungeonMaster.flatpak dev.uukelele.dungeonmaster
 
       - name: Upload Artifacts
